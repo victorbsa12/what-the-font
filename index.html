@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>What@ Font</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Lobster&family=Merriweather:wght@400;700&family=Montserrat:wght@700&family=Open+Sans:wght@400;700&family=Oswald:wght@600&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:wght@700&family=Poppins:wght@600&family=Raleway:wght@600&family=Roboto:wght@400;700&family=Roboto+Condensed:wght@700&family=Roboto+Slab:wght@700&family=Rubik:wght@700&family=Source+Sans+3:wght@400;700&family=Ubuntu:wght@700&family=Lato:wght@700&family=Nunito:wght@700&display=swap" />
+
+<style>
+  html, body { background: #fafaf8; }
+
+  .confetti-container {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none; z-index: 999; overflow: hidden;
+  }
+  .confetti-piece {
+    position: absolute; top: -12px;
+    border-radius: 2px;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    85%  { opacity: 1; }
+    100% { transform: translateY(105vh) rotate(900deg); opacity: 0; }
+  }
+
+  .joke-display {
+    line-height: 1.35;
+    transition: opacity 0.25s ease;
+    white-space: pre-wrap;
+  }
+
+  .opt-btn {
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+    background: transparent;
+  }
+  .opt-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+  }
+  .opt-btn:active:not(:disabled) { transform: scale(0.97); }
+  .opt-btn.correct { border-color: #4ade80 !important; color: #15803d !important; }
+  .opt-btn.wrong   { border-color: #fb7185 !important; color: #be123c !important; opacity: 0.55; }
+
+  .attempt-dot { width: 8px; height: 8px; border-radius: 50%; transition: background 0.2s; }
+
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateY(0); }
+    100% { opacity: 0; transform: translateY(-56px); }
+  }
+  .float-up { animation: floatUp 0.9s ease forwards; }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+  .shake { animation: shake 0.4s ease; }
+
+  /* End screen */
+  #endScreen { display: none; }
+
+  @keyframes scorePop {
+    0%   { transform: scale(0.5); opacity: 0; }
+    70%  { transform: scale(1.1); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .score-pop { animation: scorePop 0.6s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+  .score-badge { font-variant-numeric: tabular-nums; }
+</style>
+</head>
+
+<body class="min-h-screen bg-[#fafaf8] text-stone-800 select-none">
+
+<div class="confetti-container" id="confettiLayer"></div>
+
+<!-- ── GAME SCREEN ── -->
+<div id="gameScreen">
+
+  <!-- Header -->
+  <header class="border-b border-stone-200 sticky top-0 z-50 backdrop-blur-sm">
+    <div class="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="font-black text-xl text-stone-900" style="font-family:'Bebas Neue',sans-serif;letter-spacing:.06em">What@</span>
+        <span class="text-xs font-semibold border border-stone-300 text-stone-500 px-2 py-0.5 rounded-full">Font</span>
+      </div>
+      <div class="flex items-center gap-5">
+        <div class="text-right">
+          <div class="text-[10px] font-medium text-stone-400 uppercase tracking-widest" id="label-score">Score</div>
+          <div class="text-lg font-bold text-stone-900 score-badge leading-none" id="scoreDisplay">0</div>
+        </div>
+        <div class="w-px h-7 bg-stone-200"></div>
+        <div class="text-right">
+          <div class="text-[10px] font-medium text-stone-400 uppercase tracking-widest" id="label-round">Round</div>
+          <div class="text-lg font-bold text-stone-500 score-badge leading-none"><span id="roundDisplay">1</span><span class="text-stone-300">/20</span></div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-xl mx-auto px-4 py-10 flex flex-col items-center gap-8">
+
+    <!-- Progress bar -->
+    <div class="w-full h-1 bg-stone-100 rounded-full overflow-hidden">
+      <div id="progressBar" class="h-full bg-stone-400 rounded-full transition-all duration-500" style="width:5%"></div>
+    </div>
+
+    <!-- Joke card -->
+    <div class="relative w-full border border-stone-200 rounded-2xl flex flex-col items-center justify-center min-h-[200px] px-8 py-10">
+      <div class="absolute top-4 right-5 flex gap-1.5" id="attemptDots"></div>
+      <p class="joke-display text-center text-stone-900" id="jokeDisplay" aria-live="polite">—</p>
+      <div class="absolute top-4 left-5">
+        <span id="pointsFloat" class="text-2xl font-black text-emerald-500 opacity-0 pointer-events-none"></span>
+      </div>
+    </div>
+
+    <!-- Options -->
+    <div class="w-full flex flex-col gap-3" id="optionsContainer"></div>
+
+    <!-- Feedback -->
+    <p class="text-sm text-stone-400 h-5 text-center" id="feedbackText"></p>
+
+    <!-- Next button -->
+    <button id="nextBtn" onclick="nextRound()"
+      class="hidden px-8 py-3 rounded-full border border-stone-300 text-stone-700 text-sm font-semibold hover:border-stone-400 transition-all">
+      <span id="nextBtnLabel">Next →</span>
+    </button>
+
+  </main>
+</div><!-- /gameScreen -->
+
+
+<!-- ── END SCREEN ── -->
+<div id="endScreen" class="min-h-screen flex flex-col items-center justify-center px-4 py-16">
+  <div class="max-w-sm w-full flex flex-col items-center gap-8 text-center">
+
+    <div>
+      <div class="text-[10px] font-semibold uppercase tracking-[.2em] text-stone-400 mb-1" id="end-label-title">What@ Font</div>
+      <h1 class="text-4xl font-black text-stone-900 tracking-tight" style="font-family:'Bebas Neue',sans-serif;letter-spacing:.04em" id="end-headline">Game Over</h1>
+    </div>
+
+    <!-- Score big -->
+    <div class="flex flex-col items-center gap-1">
+      <div class="text-[11px] font-medium text-stone-400 uppercase tracking-widest" id="end-label-score">Final score</div>
+      <div class="score-pop text-7xl font-black text-stone-900 score-badge leading-none" id="endScoreDisplay">0</div>
+      <div class="text-sm text-stone-400 mt-1" id="endSubtitle"></div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="w-full grid grid-cols-3 gap-3">
+      <div class="border border-stone-200 rounded-xl py-4 flex flex-col items-center gap-1">
+        <div class="text-xl font-bold text-stone-900 score-badge" id="statFirst">0</div>
+        <div class="text-[10px] text-stone-400 uppercase tracking-wide" id="label-first">1st try</div>
+      </div>
+      <div class="border border-stone-200 rounded-xl py-4 flex flex-col items-center gap-1">
+        <div class="text-xl font-bold text-stone-900 score-badge" id="statSecond">0</div>
+        <div class="text-[10px] text-stone-400 uppercase tracking-wide" id="label-second">2nd try</div>
+      </div>
+      <div class="border border-stone-200 rounded-xl py-4 flex flex-col items-center gap-1">
+        <div class="text-xl font-bold text-stone-900 score-badge" id="statMissed">0</div>
+        <div class="text-[10px] text-stone-400 uppercase tracking-wide" id="label-missed">Missed</div>
+      </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="flex flex-col gap-3 w-full">
+      <button onclick="shareResult()"
+        class="w-full py-3.5 rounded-full border border-stone-900 bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 transition-all flex items-center justify-center gap-2">
+        <span id="label-share">Share result</span>
+      </button>
+      <button onclick="restartGame()"
+        class="w-full py-3.5 rounded-full border border-stone-300 text-stone-700 text-sm font-semibold hover:border-stone-400 transition-all">
+        <span id="label-restart">Play again</span>
+      </button>
+    </div>
+
+  </div>
+</div><!-- /endScreen -->
+
+
+<script>
+// ── i18n ──────────────────────────────────────────────────────────────────────
+const LANGS = {
+  pt: {
+    score: 'Pontuação', round: 'Rodada',
+    next: 'Próxima →',
+    correct: ['Acertou!','Muito bem!','Excelente!','Isso mesmo!','Perfeito!'],
+    wrong1: 'Errou! Ainda', wrong1b: 'tentativa', wrong1c: 'tentativas',
+    wrong2: 'Última tentativa!',
+    miss: 'Era', miss2: 'Próxima!',
+    endHeadline: 'Fim de jogo',
+    endLabelScore: 'Pontuação final',
+    endSubtitles: [
+      [240, '🏆 Incrível! Você é um tipógrafo nato.'],
+      [180, '🎯 Muito bem! Olho clínico nas fontes.'],
+      [120, '👀 Não foi mal! Ainda tem o que aprender.'],
+      [0,   '😅 Hmm... continue treinando!'],
+    ],
+    labelFirst: '1ª tentativa', labelSecond: '2ª tentativa', labelMissed: 'Errou',
+    labelShare: 'Compartilhar resultado', labelRestart: 'Jogar de novo',
+    shareText: (score, f, s, m) =>
+      `🔤 What@ Font\nFiz ${score} pontos!\n✅ ${f} de primeira · 🔄 ${s} de segunda · ❌ ${m} errei\nwhatafonts.vercel.app`,
+    copied: 'Copiado! Cola onde quiser.',
+  },
+  en: {
+    score: 'Score', round: 'Round',
+    next: 'Next →',
+    correct: ['Correct!','Nice one!','Excellent!','That\'s it!','Perfect!'],
+    wrong1: 'Wrong! Still', wrong1b: 'try', wrong1c: 'tries',
+    wrong2: 'Last try!',
+    miss: 'It was', miss2: 'Next one!',
+    endHeadline: 'Game Over',
+    endLabelScore: 'Final score',
+    endSubtitles: [
+      [240, '🏆 Outstanding! You\'re a type nerd.'],
+      [180, '🎯 Great eye for fonts!'],
+      [120, '👀 Not bad! Room to improve.'],
+      [0,   '😅 Keep practicing!'],
+    ],
+    labelFirst: '1st try', labelSecond: '2nd try', labelMissed: 'Missed',
+    labelShare: 'Share result', labelRestart: 'Play again',
+    shareText: (score, f, s, m) =>
+      `🔤 What@ Font\nScored ${score} pts!\n✅ ${f} first try · 🔄 ${s} second · ❌ ${m} missed\nwhatafonts.vercel.app`,
+    copied: 'Copied! Paste anywhere.',
+  },
+  es: {
+    score: 'Puntos', round: 'Ronda',
+    next: 'Siguiente →',
+    correct: ['¡Correcto!','¡Muy bien!','¡Excelente!','¡Eso es!','¡Perfecto!'],
+    wrong1: '¡Fallaste! Aún', wrong1b: 'intento', wrong1c: 'intentos',
+    wrong2: '¡Último intento!',
+    miss: 'Era', miss2: '¡Siguiente!',
+    endHeadline: 'Fin del juego',
+    endLabelScore: 'Puntuación final',
+    endSubtitles: [
+      [240, '🏆 ¡Increíble! Eres un experto en tipografía.'],
+      [180, '🎯 ¡Muy bien! Buen ojo para las fuentes.'],
+      [120, '👀 ¡No estuvo mal! Aún hay margen de mejora.'],
+      [0,   '😅 ¡Sigue practicando!'],
+    ],
+    labelFirst: '1er intento', labelSecond: '2do intento', labelMissed: 'Fallaste',
+    labelShare: 'Compartir resultado', labelRestart: 'Jugar de nuevo',
+    shareText: (score, f, s, m) =>
+      `🔤 What@ Font\n¡${score} puntos!\n✅ ${f} al primer intento · 🔄 ${s} al segundo · ❌ ${m} fallé\nwhatafonts.vercel.app`,
+    copied: '¡Copiado! Pégalo donde quieras.',
+  },
+};
+
+function getLang() {
+  const code = (navigator.language || 'en').slice(0,2).toLowerCase();
+  return LANGS[code] || LANGS['en'];
+}
+const T = getLang();
+
+// Apply static labels
+document.getElementById('label-score').textContent    = T.score;
+document.getElementById('label-round').textContent    = T.round;
+document.getElementById('end-headline').textContent   = T.endHeadline;
+document.getElementById('end-label-score').textContent = T.endLabelScore;
+document.getElementById('label-first').textContent    = T.labelFirst;
+document.getElementById('label-second').textContent   = T.labelSecond;
+document.getElementById('label-missed').textContent   = T.labelMissed;
+document.getElementById('label-share').textContent    = T.labelShare;
+document.getElementById('label-restart').textContent  = T.labelRestart;
+document.getElementById('nextBtnLabel').textContent   = T.next;
+
+// ── Top 20 fonts ──────────────────────────────────────────────────────────────
+const ALL_FONTS = [
+  { name: 'Roboto',            css: "'Roboto', sans-serif" },
+  { name: 'Open Sans',         css: "'Open Sans', sans-serif" },
+  { name: 'Montserrat',        css: "'Montserrat', sans-serif" },
+  { name: 'Lato',              css: "'Lato', sans-serif" },
+  { name: 'Poppins',           css: "'Poppins', sans-serif" },
+  { name: 'Oswald',            css: "'Oswald', sans-serif" },
+  { name: 'Raleway',           css: "'Raleway', sans-serif" },
+  { name: 'Nunito',            css: "'Nunito', sans-serif" },
+  { name: 'Rubik',             css: "'Rubik', sans-serif" },
+  { name: 'Source Sans 3',     css: "'Source Sans 3', sans-serif" },
+  { name: 'Ubuntu',            css: "'Ubuntu', sans-serif" },
+  { name: 'Merriweather',      css: "'Merriweather', serif" },
+  { name: 'Playfair Display',  css: "'Playfair Display', serif" },
+  { name: 'Roboto Slab',       css: "'Roboto Slab', serif" },
+  { name: 'Roboto Condensed',  css: "'Roboto Condensed', sans-serif" },
+  { name: 'Bebas Neue',        css: "'Bebas Neue', sans-serif" },
+  { name: 'Lobster',           css: "'Lobster', cursive" },
+  { name: 'Pacifico',          css: "'Pacifico', cursive" },
+  { name: 'Dancing Script',    css: "'Dancing Script', cursive" },
+  { name: 'Permanent Marker',  css: "'Permanent Marker', cursive" },
+];
+
+// ── Dad jokes ─────────────────────────────────────────────────────────────────
+const JOKES = {
+  pt: [
+    "Por que o livro de matemática ficou triste?\nTinha muitos problemas.",
+    "O que o zero disse para o oito?\nQue cinto bonito!",
+    "Por que o espantalho ganhou prêmio?\nEra destaque no campo.",
+    "O que o peixe disse quando bateu na parede?\nDam!",
+    "Por que o computador foi ao médico?\nTinha vírus.",
+    "Qual o animal que mais entende de informática?\nO rato.",
+    "Eu era viciado em sabão.\nMas estou limpo agora.",
+    "Por que o esqueleto não briga?\nNão tem estômago para isso.",
+    "Qual é o cúmulo da economia?\nGuardar o eco.",
+    "O que o oceano disse para a praia?\nNada, só deu uma onda.",
+    "Por que o sol não foi à escola?\nJá tinha um milhão de graus.",
+    "O que a parede disse para a outra?\nA gente se encontra no canto.",
+    "Por que o professor usou óculos escuros?\nTinha alunos brilhantes.",
+    "O que o tomate disse para o outro?\nVou passar na frente, estou ketchup.",
+    "Por que o relógio foi para a escola?\nQueria aprender a dar horas.",
+    "Por que o calendário ficou nervoso?\nTinha muitos dias marcados.",
+    "Por que o livro foi para a academia?\nQueria ficar em boa forma.",
+    "Qual é o peixe que dirige?\nO peixe-auto-móvel.",
+    "Por que o astronauta não se casou?\nNão queria uma vida no espaço.",
+    "Por que o fantasma não mente?\nPorque se vê através dele.",
+  ],
+  en: [
+    "Why can't you give Elsa a balloon?\nShe'll let it go.",
+    "I'm reading a book about anti-gravity.\nIt's impossible to put down.",
+    "Why don't scientists trust atoms?\nBecause they make up everything.",
+    "I told my wife she was drawing her eyebrows too high.\nShe looked surprised.",
+    "What do you call cheese that isn't yours?\nNacho cheese.",
+    "Why can't a bicycle stand on its own?\nBecause it's two-tired.",
+    "I used to hate facial hair…\nbut then it grew on me.",
+    "What do you call a fake noodle?\nAn impasta.",
+    "Why do cows wear bells?\nBecause their horns don't work.",
+    "Why do seagulls fly over the ocean?\nBecause if they flew over the bay, we'd call them bagels.",
+    "I have a joke about construction…\nI'm still working on it.",
+    "What do you call a sleeping dinosaur?\nA dino-snore.",
+    "Why did the scarecrow win an award?\nBecause he was outstanding in his field.",
+    "I only know 25 letters of the alphabet.\nI don't know y.",
+    "What do you call a fish without eyes?\nA fsh.",
+    "Why do bees have sticky hair?\nBecause they use a honeycomb.",
+    "What did the ocean say to the shore?\nNothing, it just waved.",
+    "Why did the belt get arrested?\nIt was holding up a pair of pants.",
+    "What do you call a lazy kangaroo?\nA pouch potato.",
+    "I'm on a seafood diet.\nI see food and I eat it.",
+  ],
+  es: [
+    "¿Por qué el libro de matemáticas estaba triste?\nTenía demasiados problemas.",
+    "¿Qué le dijo el cero al ocho?\n¡Qué lindo cinturón!",
+    "¿Por qué el espantapájaros ganó un premio?\nPorque era sobresaliente en su campo.",
+    "¿Qué hace una abeja en el gimnasio?\n¡Zum-ba!",
+    "¿Por qué el esqueleto no pelea?\nNo tiene agallas.",
+    "¿Qué le dijo el semáforo al auto?\nNo me mires, me estoy cambiando.",
+    "¿Cuál es el colmo de un electricista?\nQue su hijo se llame Ernesto.",
+    "¿Por qué los pájaros vuelan hacia el sur?\nPorque es demasiado lejos para ir caminando.",
+    "¿Qué le dijo el mar al barco?\nNada, solo lo saludó con una ola.",
+    "¿Por qué el reloj fue al médico?\nPorque se sentía un poco lento.",
+    "¿Qué animal tiene más letras?\nEl abecedario.",
+    "¿Cómo se despiden los químicos?\nÁcido un placer.",
+    "¿Por qué la escoba está contenta?\nPorque barreló mejor.",
+    "¿Qué hace una vaca con un mapa?\nBusca el camino a la lechería.",
+    "¿Por qué los pájaros no usan Facebook?\nYa tienen Twitter.",
+    "¿Qué le dice un techo a otro techo?\nTecho de menos.",
+    "¿Por qué el sol no va a la escuela?\nYa tiene millones de grados.",
+    "¿Cómo se llama el campeón de buceo japonés?\nYamamoto Naofondo.",
+    "¿Qué hace un perro con un taladro?\nTaladrando.",
+    "¿Por qué el libro fue al médico?\nPorque tenía muchas hojas.",
+  ],
+};
+
+function getJokes() {
+  const code = (navigator.language || 'en').slice(0,2).toLowerCase();
+  return JOKES[code] || JOKES['en'];
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
+let score = 0, roundNum = 0;
+let statFirst = 0, statSecond = 0, statMissed = 0;
+let fontQueue = [];
+let jokeQueue = [];
+let currentFont, options, correctIdx, attempt, answered;
+
+const TOTAL = 20;
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length-1; i>0; i--) {
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+function rnd(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
+function rndInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+
+// ── Confetti ──────────────────────────────────────────────────────────────────
+const CC = ['#a78bfa','#34d399','#fb7185','#60a5fa','#fbbf24','#f472b6','#4ade80','#f97316'];
+function launchConfetti(count=60) {
+  const layer = document.getElementById('confettiLayer');
+  for (let i=0; i<count; i++) {
+    const p = document.createElement('div');
+    p.className='confetti-piece';
+    p.style.left              = rndInt(5,95)+'%';
+    p.style.background        = CC[i%CC.length];
+    p.style.width             = rndInt(7,12)+'px';
+    p.style.height            = rndInt(7,12)+'px';
+    p.style.borderRadius      = rnd(['2px','50%','0']);
+    p.style.animationDuration = rndInt(900,1600)+'ms';
+    p.style.animationDelay    = rndInt(0,500)+'ms';
+    layer.appendChild(p);
+    setTimeout(()=>p.remove(), 2200);
+  }
+}
+
+// ── HUD ───────────────────────────────────────────────────────────────────────
+function updateHUD() {
+  document.getElementById('scoreDisplay').textContent = score;
+  document.getElementById('roundDisplay').textContent = Math.min(roundNum+1, TOTAL);
+  document.getElementById('progressBar').style.width  = ((roundNum)/TOTAL*100)+'%';
+}
+
+function renderDots(active, used) {
+  const c = document.getElementById('attemptDots');
+  c.innerHTML = '';
+  for (let i=0;i<3;i++){
+    const d = document.createElement('div');
+    d.className='attempt-dot';
+    d.style.background = i<used ? '#fb7185' : i===active ? '#4ade80' : '#e7e5e4';
+    c.appendChild(d);
+  }
+}
+
+function showFeedback(msg) { document.getElementById('feedbackText').textContent = msg; }
+
+function showPointsFloat(pts) {
+  const el = document.getElementById('pointsFloat');
+  el.textContent = '+'+pts;
+  el.style.opacity='1';
+  el.classList.remove('float-up');
+  void el.offsetWidth;
+  el.classList.add('float-up');
+  setTimeout(()=>{ el.style.opacity='0'; el.classList.remove('float-up'); }, 950);
+}
+
+// ── Round ─────────────────────────────────────────────────────────────────────
+function startGame() {
+  score=0; roundNum=0; statFirst=0; statSecond=0; statMissed=0;
+  fontQueue = shuffle([...ALL_FONTS]);
+  jokeQueue = shuffle([...getJokes()]);
+  document.getElementById('gameScreen').style.display='block';
+  document.getElementById('endScreen').style.display='none';
+  updateHUD();
+  nextRound();
+}
+
+function nextRound() {
+  if (roundNum >= TOTAL) { showEndScreen(); return; }
+
+  document.getElementById('nextBtn').style.display='none';
+  showFeedback('');
+  updateHUD();
+
+  currentFont = fontQueue[roundNum];
+  const joke  = jokeQueue[roundNum % jokeQueue.length];
+
+  const distractors = shuffle(ALL_FONTS.filter(f=>f.name!==currentFont.name)).slice(0,2);
+  options    = shuffle([currentFont,...distractors]);
+  correctIdx = options.indexOf(currentFont);
+  attempt=0; answered=false;
+
+  const el = document.getElementById('jokeDisplay');
+  el.style.opacity='0';
+  setTimeout(()=>{
+    el.textContent      = joke;
+    el.style.fontFamily = currentFont.css;
+    el.style.fontSize   = joke.length>80 ? '1.35rem' : joke.length>50 ? '1.6rem' : '2rem';
+    el.style.opacity='1';
+  }, 160);
+
+  renderDots(0,0);
+  renderOptions();
+}
+
+function renderOptions() {
+  const c = document.getElementById('optionsContainer');
+  c.innerHTML='';
+  ['A','B','C'].forEach((letter,i)=>{
+    const btn=document.createElement('button');
+    btn.className='opt-btn w-full flex items-center gap-3 px-5 py-4 border border-stone-200 rounded-xl text-left text-sm font-medium text-stone-700 cursor-pointer';
+    btn.innerHTML=`
+      <span class="w-7 h-7 flex-shrink-0 rounded-full border border-stone-200 flex items-center justify-center text-xs font-bold text-stone-500">${letter}</span>
+      <span>${options[i].name}</span>`;
+    btn.addEventListener('click',()=>handleAnswer(i));
+    c.appendChild(btn);
+  });
+}
+
+function handleAnswer(idx) {
+  if (answered) return;
+  const btns = document.querySelectorAll('.opt-btn');
+
+  if (idx===correctIdx) {
+    answered=true;
+    btns[idx].classList.add('correct');
+    btns.forEach(b=>b.disabled=true);
+
+    const pts = attempt===0?12:attempt===1?6:3;
+    if (attempt===0) statFirst++;
+    else if (attempt===1) statSecond++;
+    score+=pts;
+    roundNum++;
+
+    showPointsFloat(pts);
+    launchConfetti(attempt===0?70:40);
+    showFeedback(rnd(T.correct)+'  +'+pts+' pts');
+    document.getElementById('nextBtn').style.display='inline-block';
+
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[idx].disabled=true;
+
+    const el=document.getElementById('jokeDisplay');
+    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
+    setTimeout(()=>el.classList.remove('shake'),450);
+
+    attempt++;
+    renderDots(attempt<3?attempt:-1, attempt);
+
+    if (attempt>=3) {
+      answered=true;
+      statMissed++;
+      roundNum++;
+      btns.forEach(b=>b.disabled=true);
+      btns[correctIdx].classList.add('correct');
+      showFeedback(T.miss+' '+options[correctIdx].name+'. '+T.miss2);
+      document.getElementById('nextBtn').style.display='inline-block';
+    } else {
+      const remaining=3-attempt;
+      showFeedback(attempt===2 ? T.wrong2 : T.wrong1+' '+remaining+' '+(remaining===1?T.wrong1b:T.wrong1c)+'.');
+    }
+  }
+}
+
+// ── End screen ────────────────────────────────────────────────────────────────
+function showEndScreen() {
+  launchConfetti(100);
+  document.getElementById('gameScreen').style.display='none';
+  document.getElementById('endScreen').style.display='flex';
+
+  document.getElementById('endScoreDisplay').textContent = score;
+  document.getElementById('statFirst').textContent   = statFirst;
+  document.getElementById('statSecond').textContent  = statSecond;
+  document.getElementById('statMissed').textContent  = statMissed;
+
+  const sub = T.endSubtitles.find(([min])=>score>=min);
+  document.getElementById('endSubtitle').textContent = sub ? sub[1] : '';
+
+  // re-trigger pop animation
+  const el = document.getElementById('endScoreDisplay');
+  el.classList.remove('score-pop');
+  void el.offsetWidth;
+  el.classList.add('score-pop');
+}
+
+function restartGame() {
+  startGame();
+}
+
+async function shareResult() {
+  const text = T.shareText(score, statFirst, statSecond, statMissed);
+  try {
+    if (navigator.share) {
+      await navigator.share({ text });
+    } else {
+      await navigator.clipboard.writeText(text);
+      showShareFeedback();
+    }
+  } catch {
+    try {
+      await navigator.clipboard.writeText(text);
+      showShareFeedback();
+    } catch { }
+  }
+}
+
+function showShareFeedback() {
+  const btn = document.querySelector('#endScreen button');
+  const orig = btn.querySelector('span').textContent;
+  btn.querySelector('span').textContent = T.copied;
+  setTimeout(()=>{ btn.querySelector('span').textContent = orig; }, 2500);
+}
+
+// ── Boot ──────────────────────────────────────────────────────────────────────
+startGame();
+</script>
+</body>
+</html>
