@@ -7,7 +7,7 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Lobster&family=Merriweather:wght@400;700&family=Montserrat:wght@700&family=Open+Sans:wght@400;700&family=Oswald:wght@600&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:wght@700&family=Poppins:wght@600&family=Raleway:wght@600&family=Roboto:wght@400;700&family=Roboto+Condensed:wght@700&family=Roboto+Slab:wght@700&family=Rubik:wght@700&family=Source+Sans+3:wght@400;700&family=Ubuntu:wght@700&family=Lato:wght@700&family=Nunito:wght@700&display=swap" />
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Dancing+Script:wght@700&family=Lobster&family=Merriweather:wght@400;700&family=Montserrat:wght@700&family=Oswald:wght@600&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:wght@700&family=Poppins:wght@600&family=Raleway:wght@600&family=Roboto+Condensed:wght@700&family=Roboto+Slab:wght@700&family=Nunito:wght@700&family=Press+Start+2P&family=Abril+Fatface&family=Cinzel:wght@400;700&family=Comfortaa:wght@400;700&family=Righteous&family=Fredoka+One&display=swap" />
 
 <style>
   html, body { background: #fafaf8; }
@@ -81,6 +81,7 @@
 <body class="min-h-screen bg-[#fafaf8] text-stone-800 select-none">
 
 <div class="confetti-container" id="confettiLayer"></div>
+<div id="fontTester" aria-hidden="true" style="position:absolute;top:-9999px;left:-9999px;visibility:hidden;font-size:48px;"></div>
 
 <!-- ── INTRO SCREEN ── -->
 <div id="introScreen" class="min-h-screen flex flex-col items-center justify-center px-4 py-16">
@@ -136,9 +137,8 @@
     </div>
 
     <!-- Joke card -->
-    <div class="relative w-full border border-stone-200 rounded-2xl flex flex-col items-center justify-center min-h-[200px] px-8 py-10">
+    <div id="jokeCard" class="relative w-full border border-stone-200 rounded-2xl flex flex-col items-center justify-center min-h-[200px] px-8 py-10">
       <div class="absolute top-4 right-5 flex gap-1.5" id="attemptDots"></div>
-      <p class="joke-display text-center text-stone-900" id="jokeDisplay" aria-live="polite">—</p>
       <div class="absolute top-4 left-5">
         <span id="pointsFloat" class="text-2xl font-black text-emerald-500 opacity-0 pointer-events-none"></span>
       </div>
@@ -301,26 +301,26 @@ document.getElementById('nextBtnLabel').textContent   = T.next;
 
 // ── Top 20 fonts ──────────────────────────────────────────────────────────────
 const ALL_FONTS = [
-  { name: 'Roboto',            css: "'Roboto', sans-serif" },
-  { name: 'Open Sans',         css: "'Open Sans', sans-serif" },
-  { name: 'Montserrat',        css: "'Montserrat', sans-serif" },
-  { name: 'Lato',              css: "'Lato', sans-serif" },
-  { name: 'Poppins',           css: "'Poppins', sans-serif" },
-  { name: 'Oswald',            css: "'Oswald', sans-serif" },
-  { name: 'Raleway',           css: "'Raleway', sans-serif" },
-  { name: 'Nunito',            css: "'Nunito', sans-serif" },
-  { name: 'Rubik',             css: "'Rubik', sans-serif" },
-  { name: 'Source Sans 3',     css: "'Source Sans 3', sans-serif" },
-  { name: 'Ubuntu',            css: "'Ubuntu', sans-serif" },
-  { name: 'Merriweather',      css: "'Merriweather', serif" },
-  { name: 'Playfair Display',  css: "'Playfair Display', serif" },
-  { name: 'Roboto Slab',       css: "'Roboto Slab', serif" },
-  { name: 'Roboto Condensed',  css: "'Roboto Condensed', sans-serif" },
-  { name: 'Bebas Neue',        css: "'Bebas Neue', sans-serif" },
-  { name: 'Lobster',           css: "'Lobster', cursive" },
-  { name: 'Pacifico',          css: "'Pacifico', cursive" },
-  { name: 'Dancing Script',    css: "'Dancing Script', cursive" },
-  { name: 'Permanent Marker',  css: "'Permanent Marker', cursive" },
+  { name: 'Bebas Neue',        css: "Bebas Neue, sans-serif" },
+  { name: 'Lobster',           css: "Lobster, cursive" },
+  { name: 'Pacifico',          css: "Pacifico, cursive" },
+  { name: 'Dancing Script',    css: "Dancing Script, cursive" },
+  { name: 'Permanent Marker',  css: "Permanent Marker, cursive" },
+  { name: 'Playfair Display',  css: "Playfair Display, serif" },
+  { name: 'Merriweather',      css: "Merriweather, serif" },
+  { name: 'Oswald',            css: "Oswald, sans-serif" },
+  { name: 'Montserrat',        css: "Montserrat, sans-serif" },
+  { name: 'Raleway',           css: "Raleway, sans-serif" },
+  { name: 'Nunito',            css: "Nunito, sans-serif" },
+  { name: 'Poppins',           css: "Poppins, sans-serif" },
+  { name: 'Roboto Slab',       css: "Roboto Slab, serif" },
+  { name: 'Roboto Condensed',  css: "Roboto Condensed, sans-serif" },
+  { name: 'Press Start 2P',    css: "Press Start 2P, cursive" },
+  { name: 'Abril Fatface',     css: "Abril Fatface, serif" },
+  { name: 'Cinzel',            css: "Cinzel, serif" },
+  { name: 'Comfortaa',         css: "Comfortaa, sans-serif" },
+  { name: 'Righteous',         css: "Righteous, sans-serif" },
+  { name: 'Fredoka One',       css: "Fredoka One, cursive" },
 ];
 
 // ── Dad jokes ─────────────────────────────────────────────────────────────────
@@ -399,24 +399,50 @@ function getJokes() {
 }
 
 // ── State ─────────────────────────────────────────────────────────────────────
+const TOTAL = 20;
+
+// Round state — all set together in loadRound(), never touched elsewhere
+let roundState = null;
+/*
+  roundState = {
+    font:       { name, css },   // the correct font
+    optionNames: [string x3],    // shuffled display names
+    correctIdx:  number,         // index in optionNames that is correct
+    joke:        string,
+  }
+*/
+
 let score = 0, roundNum = 0;
 let statFirst = 0, statSecond = 0, statMissed = 0;
-let fontQueue = [];
-let jokeQueue = [];
-let currentFont, options, correctIdx, attempt, answered;
-
-const TOTAL = 20;
+let fontQueue = [], jokeQueue = [];
+let attempt = 0, answered = false;
 
 function shuffle(arr) {
   const a = [...arr];
-  for (let i = a.length-1; i>0; i--) {
-    const j = Math.floor(Math.random()*(i+1));
-    [a[i],a[j]]=[a[j],a[i]];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
   }
   return a;
 }
-function rnd(arr) { return arr[Math.floor(Math.random()*arr.length)]; }
-function rndInt(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+function rnd(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function rndInt(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+
+// Build a self-contained round descriptor — pure function, no globals mutated
+function buildRound(roundIndex) {
+  const font = fontQueue[roundIndex];
+  const joke = jokeQueue[roundIndex % jokeQueue.length];
+
+  // Pick 2 distractors whose names differ from the correct font
+  const others = ALL_FONTS.filter(f => f.name !== font.name);
+  const distractors = shuffle(others).slice(0, 2).map(f => f.name);
+
+  // Build the names array and shuffle it
+  const names = shuffle([font.name, ...distractors]);
+  const correctIdx = names.indexOf(font.name);
+
+  return { font, joke, optionNames: names, correctIdx };
+}
 
 // ── Confetti ──────────────────────────────────────────────────────────────────
 const CC = ['#a78bfa','#34d399','#fb7185','#60a5fa','#fbbf24','#f472b6','#4ade80','#f97316'];
@@ -482,87 +508,108 @@ function startGame() {
 function nextRound() {
   if (roundNum >= TOTAL) { showEndScreen(); return; }
 
-  document.getElementById('nextBtn').style.display='none';
+  document.getElementById('nextBtn').style.display = 'none';
   showFeedback('');
+  attempt  = 0;
+  answered = false;
+
+  // Build round state once — immutable from here on
+  roundState = buildRound(roundNum);
+
   updateHUD();
-
-  currentFont = fontQueue[roundNum];
-  const joke  = jokeQueue[roundNum % jokeQueue.length];
-
-  const distractors = shuffle(ALL_FONTS.filter(f=>f.name!==currentFont.name)).slice(0,2);
-  options    = shuffle([currentFont,...distractors]);
-  correctIdx = options.indexOf(currentFont);
-  attempt=0; answered=false;
-
-  const el = document.getElementById('jokeDisplay');
-  el.style.opacity='0';
-  setTimeout(()=>{
-    el.textContent      = joke;
-    el.style.fontFamily = currentFont.css;
-    el.style.fontSize   = joke.length>80 ? '1.35rem' : joke.length>50 ? '1.6rem' : '2rem';
-    el.style.opacity='1';
-  }, 160);
-
-  renderDots(0,0);
+  renderDots(0, 0);
   renderOptions();
+
+  const card = document.getElementById('jokeCard');
+  const oldEl = document.getElementById('jokeDisplay');
+  if (oldEl) oldEl.remove();
+
+  const fontSize = roundState.joke.length > 80 ? '1.35rem' : roundState.joke.length > 50 ? '1.6rem' : '2rem';
+  const newEl = document.createElement('p');
+  newEl.id = 'jokeDisplay';
+  newEl.setAttribute('aria-live', 'polite');
+  newEl.textContent = roundState.joke;
+  newEl.setAttribute('style',
+    'font-family:' + roundState.font.css + ' !important;' +
+    'font-size:' + fontSize + ';' +
+    'line-height:1.35;' +
+    'white-space:pre-wrap;' +
+    'text-align:center;' +
+    'color:#1c1917;' +
+    'opacity:0;' +
+    'transition:opacity 0.25s ease;'
+  );
+  card.appendChild(newEl);
+  // Force layout then fade in
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      newEl.style.opacity = '1';
+    });
+  });
 }
 
 function renderOptions() {
   const c = document.getElementById('optionsContainer');
-  c.innerHTML='';
-  ['A','B','C'].forEach((letter,i)=>{
-    const btn=document.createElement('button');
-    btn.className='opt-btn w-full flex items-center gap-3 px-5 py-4 border border-stone-200 rounded-xl text-left text-sm font-medium text-stone-700 cursor-pointer';
-    btn.innerHTML=`
-      <span class="w-7 h-7 flex-shrink-0 rounded-full border border-stone-200 flex items-center justify-center text-xs font-bold text-stone-500">${letter}</span>
-      <span>${options[i].name}</span>`;
-    btn.addEventListener('click',()=>handleAnswer(i));
+  c.innerHTML = '';
+  const letters = ['A', 'B', 'C'];
+  roundState.optionNames.forEach((name, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn w-full flex items-center gap-3 px-5 py-4 border border-stone-200 rounded-xl text-left text-sm font-medium text-stone-700 cursor-pointer';
+    btn.dataset.idx = String(i);
+    btn.innerHTML = `
+      <span class="w-7 h-7 flex-shrink-0 rounded-full border border-stone-200 flex items-center justify-center text-xs font-bold text-stone-500">${letters[i]}</span>
+      <span>${name}</span>`;
+    btn.addEventListener('click', () => handleAnswer(i));
     c.appendChild(btn);
   });
 }
 
 function handleAnswer(idx) {
   if (answered) return;
-  const btns = document.querySelectorAll('.opt-btn');
 
-  if (idx===correctIdx) {
-    answered=true;
+  const btns    = Array.from(document.querySelectorAll('#optionsContainer .opt-btn'));
+  const correct = roundState.correctIdx;
+
+  if (idx === correct) {
+    answered = true;
     btns[idx].classList.add('correct');
-    btns.forEach(b=>b.disabled=true);
+    btns.forEach(b => b.disabled = true);
 
-    const pts = attempt===0?12:attempt===1?6:3;
-    if (attempt===0) statFirst++;
-    else if (attempt===1) statSecond++;
-    score+=pts;
+    const pts = attempt === 0 ? 12 : attempt === 1 ? 6 : 3;
+    if (attempt === 0) statFirst++;
+    else if (attempt === 1) statSecond++;
+    score   += pts;
     roundNum++;
 
     showPointsFloat(pts);
-    launchConfetti(attempt===0?70:40);
-    showFeedback(rnd(T.correct)+'  +'+pts+' pts');
-    document.getElementById('nextBtn').style.display='inline-block';
+    launchConfetti(attempt === 0 ? 70 : 40);
+    showFeedback(rnd(T.correct) + '  +' + pts + ' pts');
+    document.getElementById('nextBtn').style.display = 'inline-block';
 
   } else {
     btns[idx].classList.add('wrong');
-    btns[idx].disabled=true;
+    btns[idx].disabled = true;
 
-    const el=document.getElementById('jokeDisplay');
-    el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake');
-    setTimeout(()=>el.classList.remove('shake'),450);
+    const el = document.getElementById('jokeDisplay');
+    el.classList.remove('shake');
+    void el.offsetWidth;
+    el.classList.add('shake');
+    setTimeout(() => el.classList.remove('shake'), 450);
 
     attempt++;
-    renderDots(attempt<3?attempt:-1, attempt);
+    renderDots(attempt < 3 ? attempt : -1, attempt);
 
-    if (attempt>=3) {
-      answered=true;
+    if (attempt >= 3) {
+      answered = true;
       statMissed++;
       roundNum++;
-      btns.forEach(b=>b.disabled=true);
-      btns[correctIdx].classList.add('correct');
-      showFeedback(T.miss+' '+options[correctIdx].name+'. '+T.miss2);
-      document.getElementById('nextBtn').style.display='inline-block';
+      btns.forEach(b => b.disabled = true);
+      btns[correct].classList.add('correct');
+      showFeedback(T.miss + ' ' + roundState.optionNames[correct] + '. ' + T.miss2);
+      document.getElementById('nextBtn').style.display = 'inline-block';
     } else {
-      const remaining=3-attempt;
-      showFeedback(attempt===2 ? T.wrong2 : T.wrong1+' '+remaining+' '+(remaining===1?T.wrong1b:T.wrong1c)+'.');
+      const remaining = 3 - attempt;
+      showFeedback(attempt === 2 ? T.wrong2 : T.wrong1 + ' ' + remaining + ' ' + (remaining === 1 ? T.wrong1b : T.wrong1c) + '.');
     }
   }
 }
@@ -618,7 +665,35 @@ function showShareFeedback() {
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-function beginGame() {
+async function beginGame() {
+  const btn = document.querySelector('#introScreen button');
+  const originalLabel = btn.textContent;
+  btn.textContent = 'Carregando fontes…';
+  btn.disabled = true;
+
+  // Inject a hidden <span> per font to force the browser to download all of them
+  const preloadDiv = document.createElement('div');
+  preloadDiv.setAttribute('aria-hidden','true');
+  preloadDiv.style.cssText = 'position:absolute;top:-9999px;left:-9999px;visibility:hidden;font-size:32px;';
+  ALL_FONTS.forEach(f => {
+    const span = document.createElement('span');
+    span.style.fontFamily = f.css;
+    span.textContent = f.name + ' AaBbCcDd 012';
+    preloadDiv.appendChild(span);
+  });
+  document.body.appendChild(preloadDiv);
+
+  // Wait until ALL fonts in the document are loaded
+  await document.fonts.ready;
+
+  // Extra safety: explicitly load each font face
+  const loadPromises = ALL_FONTS.map(f => {
+    const familyName = f.name;
+    return document.fonts.load('400 32px "' + familyName + '"').catch(()=>{});
+  });
+  await Promise.all(loadPromises);
+
+  preloadDiv.remove();
   document.getElementById('introScreen').style.display='none';
   startGame();
 }
