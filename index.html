@@ -338,7 +338,7 @@ const LANGS = {
       [120, '👀 Não foi mal! Ainda tem o que aprender.'],
       [0,   '😅 Hmm... continue treinando!'],
     ],
-    labelFirst: '1ª tentativa', labelSecond: '2ª tentativa', labelMissed: 'Errou',
+    labelFirst: '1ª tentativa', labelSecond: '2ª tentativa', labelMissed: '3ª tentativa',
     labelShare: 'Compartilhar resultado', labelRestart: 'Jogar de novo',
     shareText: (score, f, s, m) =>
       `🔤 What@ Font\nFiz ${score} pontos!\n✅ ${f} de primeira · 🔄 ${s} de segunda · ❌ ${m} errei\nwhatafonts.vercel.app`,
@@ -359,7 +359,7 @@ const LANGS = {
       [120, '👀 Not bad! Room to improve.'],
       [0,   '😅 Keep practicing!'],
     ],
-    labelFirst: '1st try', labelSecond: '2nd try', labelMissed: 'Missed',
+    labelFirst: '1st try', labelSecond: '2nd try', labelMissed: '3rd try',
     labelShare: 'Share result', labelRestart: 'Play again',
     shareText: (score, f, s, m) =>
       `🔤 What@ Font\nScored ${score} pts!\n✅ ${f} first try · 🔄 ${s} second · ❌ ${m} missed\nwhatafonts.vercel.app`,
@@ -380,7 +380,7 @@ const LANGS = {
       [120, '👀 ¡No estuvo mal! Aún hay margen de mejora.'],
       [0,   '😅 ¡Sigue practicando!'],
     ],
-    labelFirst: '1er intento', labelSecond: '2do intento', labelMissed: 'Fallaste',
+    labelFirst: '1er intento', labelSecond: '2do intento', labelMissed: '3er intento',
     labelShare: 'Compartir resultado', labelRestart: 'Jugar de nuevo',
     shareText: (score, f, s, m) =>
       `🔤 What@ Font\n¡${score} puntos!\n✅ ${f} al primer intento · 🔄 ${s} al segundo · ❌ ${m} fallé\nwhatafonts.vercel.app`,
@@ -522,7 +522,7 @@ let roundState = null;
 */
 
 let score = 0, roundNum = 0;
-let statFirst = 0, statSecond = 0, statMissed = 0;
+let statFirst = 0, statSecond = 0, statThird = 0;
 let fontQueue = [], jokeQueue = [];
 let attempt = 0, answered = false;
 
@@ -604,7 +604,7 @@ function showPointsFloat(pts) {
 
 // ── Round ─────────────────────────────────────────────────────────────────────
 function startGame() {
-  score=0; roundNum=0; statFirst=0; statSecond=0; statMissed=0;
+  score=0; roundNum=0; statFirst=0; statSecond=0; statThird=0;
   fontQueue = shuffle([...ALL_FONTS]);
   jokeQueue = shuffle([...getJokes()]);
   document.getElementById('introScreen').style.display='none';
@@ -687,6 +687,7 @@ function handleAnswer(idx) {
     const pts = attempt === 0 ? 12 : attempt === 1 ? 6 : 3;
     if (attempt === 0) statFirst++;
     else if (attempt === 1) statSecond++;
+    else statThird++;
     score   += pts;
     roundNum++;
 
@@ -710,7 +711,6 @@ function handleAnswer(idx) {
 
     if (attempt >= 3) {
       answered = true;
-      statMissed++;
       roundNum++;
       btns.forEach(b => b.disabled = true);
       btns[correct].classList.add('correct');
@@ -733,7 +733,7 @@ function showEndScreen() {
   document.getElementById('endScoreDisplay').textContent = score;
   document.getElementById('statFirst').textContent   = statFirst;
   document.getElementById('statSecond').textContent  = statSecond;
-  document.getElementById('statMissed').textContent  = statMissed;
+  document.getElementById('statMissed').textContent  = statThird;
 
   const sub = T.endSubtitles.find(([min])=>score>=min);
   document.getElementById('endSubtitle').textContent = sub ? sub[1] : '';
@@ -750,7 +750,7 @@ function restartGame() {
 }
 
 async function shareResult() {
-  const text = T.shareText(score, statFirst, statSecond, statMissed);
+  const text = T.shareText(score, statFirst, statSecond, statThird);
   try {
     if (navigator.share) {
       await navigator.share({ text });
