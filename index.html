@@ -65,6 +65,7 @@
 
   /* End screen */
   #endScreen { display: none; }
+  #introScreen { display: none; }
 
   @keyframes scorePop {
     0%   { transform: scale(0.5); opacity: 0; }
@@ -80,6 +81,28 @@
 <body class="min-h-screen bg-[#fafaf8] text-stone-800 select-none">
 
 <div class="confetti-container" id="confettiLayer"></div>
+
+<!-- ── INTRO SCREEN ── -->
+<div id="introScreen" class="min-h-screen flex flex-col items-center justify-center px-4 py-16">
+  <div class="max-w-sm w-full flex flex-col items-center gap-8 text-center">
+
+    <div class="flex items-center gap-2">
+      <span class="font-black text-3xl text-stone-900" style="font-family:'Bebas Neue',sans-serif;letter-spacing:.06em">What@</span>
+      <span class="text-sm font-semibold border border-stone-300 text-stone-500 px-2 py-0.5 rounded-full">Font</span>
+    </div>
+
+    <div class="flex flex-col gap-3">
+      <h1 class="text-3xl font-black text-stone-900 tracking-tight leading-tight">Adivinhe qual é a fonte.</h1>
+      <p class="text-sm text-stone-500 leading-relaxed">Teste suas habilidades em tipografia e tente adivinhar qual o nome da fonte.</p>
+    </div>
+
+    <button onclick="beginGame()"
+      class="w-full py-4 rounded-full bg-stone-900 text-white text-sm font-semibold hover:bg-stone-700 transition-all">
+      Iniciar
+    </button>
+
+  </div>
+</div><!-- /introScreen -->
 
 <!-- ── GAME SCREEN ── -->
 <div id="gameScreen">
@@ -449,6 +472,7 @@ function startGame() {
   score=0; roundNum=0; statFirst=0; statSecond=0; statMissed=0;
   fontQueue = shuffle([...ALL_FONTS]);
   jokeQueue = shuffle([...getJokes()]);
+  document.getElementById('introScreen').style.display='none';
   document.getElementById('gameScreen').style.display='block';
   document.getElementById('endScreen').style.display='none';
   updateHUD();
@@ -546,6 +570,7 @@ function handleAnswer(idx) {
 // ── End screen ────────────────────────────────────────────────────────────────
 function showEndScreen() {
   launchConfetti(100);
+  document.getElementById('introScreen').style.display='none';
   document.getElementById('gameScreen').style.display='none';
   document.getElementById('endScreen').style.display='flex';
 
@@ -593,7 +618,13 @@ function showShareFeedback() {
 }
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
-startGame();
+function beginGame() {
+  document.getElementById('introScreen').style.display='none';
+  startGame();
+}
+
+// Show intro on load
+document.getElementById('introScreen').style.display='flex';
 </script>
 </body>
 </html>
